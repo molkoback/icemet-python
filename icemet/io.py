@@ -1,5 +1,3 @@
-import cv2
-
 import datetime
 import os
 
@@ -88,12 +86,3 @@ class File:
 		except:
 			pass
 		raise IOException("Invalid file path") 
-
-def open_image(path):
-	return cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-
-def save_image(path, img):
-	root = os.path.split(path)[0]
-	if not os.path.exists(root):
-		os.makedirs(root)
-	cv2.imwrite(path, img)
