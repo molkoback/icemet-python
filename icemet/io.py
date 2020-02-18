@@ -47,8 +47,8 @@ class File:
 	@property
 	def name(self):
 		end = "_{:d}".format(self.sub) if self.sub > 0 else ""
-		return "{:02d}_{:02d}{:02d}{:02d}_{:02d}{:02d}{:02d}{:03d}_{:06d}_{}{}".format(
-			self.sensor_id%100,
+		return "{:02X}_{:02d}{:02d}{:02d}_{:02d}{:02d}{:02d}{:03d}_{:06d}_{}{}".format(
+			self.sensor_id % 0xff,
 			self.dt.day, self.dt.month, self.dt.year%100,
 			self.dt.hour, self.dt.minute, self.dt.second, self.dt.microsecond//1000,
 			self.frame%1000000,
@@ -73,7 +73,7 @@ class File:
 	def frompath(cls, path):
 		try:
 			name = os.path.splitext(os.path.split(path)[-1])[0]
-			sensor_id = int(name[0:2])
+			sensor_id = int(name[0:2], 16)
 			dt = datetime.datetime(
 				int(name[7:9])+2000, int(name[5:7]), int(name[3:5]),
 				hour=int(name[10:12]), minute=int(name[12:14]), second=int(name[14:16]),

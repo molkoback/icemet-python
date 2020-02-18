@@ -37,3 +37,6 @@ def save_image(path, im):
 
 def dynrange(im):
 	return np.ptp(im)
+
+def rotate(im, rot):
+	return np.rot90(im, k=int(rot/-90))
