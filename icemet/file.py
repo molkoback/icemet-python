@@ -1,3 +1,5 @@
+from icemet.img import open_image, save_image
+
 import datetime
 import os
 
@@ -5,12 +7,13 @@ class IOException(Exception):
 	pass
 
 class File:
-	def __init__(self, sensor_id, dt, frame, sub=0, empty=False):
+	def __init__(self, sensor_id, dt, frame, sub=0, empty=False, image=None):
 		self.sensor_id = sensor_id
 		self.dt = dt
 		self.frame = frame
 		self.sub = sub
 		self.empty = empty
+		self.image = image
 	
 	def __repr__(self):
 		return "<File {}>".format(self.name)
@@ -69,8 +72,11 @@ class File:
 			)
 		return os.path.join(root, self.name + ext)
 	
+	def save(self, path):
+		save_image(path, self.image)
+	
 	@classmethod
-	def frompath(cls, path):
+	def frompath(cls, path, open_image=True):
 		try:
 			name = os.path.splitext(os.path.split(path)[-1])[0]
 			sensor_id = int(name[0:2], 16)
@@ -82,7 +88,10 @@ class File:
 			frame = int(name[20:26])
 			empty = name[27] == "F"
 			sub = int(name[29:]) if len(name) > 28 else 0
-			return cls(sensor_id, dt, frame, sub=sub, empty=empty)
+			image = None
+			if open_image:
+				image = open_image(path)
+			return cls(sensor_id, dt, frame, sub=sub, empty=empty, image=image)
 		except:
 			pass
 		raise IOException("Invalid file path") 

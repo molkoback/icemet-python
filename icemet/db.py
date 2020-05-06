@@ -1,4 +1,4 @@
-from icemet.io import File
+from icemet.file import File
 
 import natsort
 import pymysql
