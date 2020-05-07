@@ -31,8 +31,7 @@ def open_image(path):
 
 def save_image(path, image):
 	root = os.path.split(path)[0]
-	if not os.path.exists(root):
-		os.makedirs(root)
+	os.makedirs(root, exist_ok=True)
 	cv2.imwrite(path, image)
 
 def dynrange(image):

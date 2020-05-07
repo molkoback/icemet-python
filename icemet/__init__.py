@@ -1,6 +1,6 @@
-import icemet.cfg
-import icemet.db
-import icemet.img
-import icemet.file
+import os
+import tempfile
 
-__version__ = "1.3.0"
+version = "1.3.0"
+cache = os.path.join(tempfile.gettempdir(), "icemet")
+os.makedirs(cache, exist_ok=True)
