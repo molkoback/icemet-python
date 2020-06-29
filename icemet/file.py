@@ -1,8 +1,15 @@
 import datetime
 import os
 
-class IOException(Exception):
+class FileException(Exception):
 	pass
+
+class FileStatus:
+	NONE = "X"
+	NOTEMPTY = "T"
+	EMPTY = "F"
+	SKIP = "S"
+statuses = "XTFS"
 
 class File:
 	def __init__(self, sensor_id, dt, frame, **kwargs):
@@ -11,7 +18,9 @@ class File:
 		self.frame = frame
 		
 		self.sub = kwargs.get("sub", 0)
-		self.empty = kwargs.get("empty", False)
+		self.status = kwargs.get("status", FileStatus.NONE)
+		if not self._status_ok(self.status):
+			raise FileException("Invalid status")
 		
 		self.image = kwargs.get("image")
 		self.package = kwargs.get("package")
@@ -56,9 +65,12 @@ class File:
 			self.dt.day, self.dt.month, self.dt.year%100,
 			self.dt.hour, self.dt.minute, self.dt.second, self.dt.microsecond//1000,
 			self.frame%1000000,
-			"F" if self.empty else "T",
+			self.status,
 			end
 		)
+	
+	def _status_ok(self, status):
+		return status in statuses
 	
 	def path(self, root=".", ext=".png", subdirs=True):
 		if not ext.startswith("."):
@@ -84,9 +96,9 @@ class File:
 				microsecond=int(name[16:19])*1000
 			)
 			frame = int(name[20:26])
-			empty = name[27] == "F"
+			status = name[27]
 			sub = int(name[29:]) if len(name) > 28 else 0
-			return cls(sensor_id, dt, frame, sub=sub, empty=empty)
+			
+			return cls(sensor_id, dt, frame, sub=sub, status=status)
 		except:
-			pass
-		raise IOException("Invalid file path") 
+			raise FileException("Invalid file path")
