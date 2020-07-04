@@ -1,15 +1,15 @@
+import enum
 import datetime
 import os
 
 class FileException(Exception):
 	pass
 
-class FileStatus:
+class FileStatus(enum.Enum):
 	NONE = "X"
 	NOTEMPTY = "T"
 	EMPTY = "F"
 	SKIP = "S"
-statuses = "XTFS"
 
 class File:
 	def __init__(self, sensor_id, dt, frame, **kwargs):
@@ -19,8 +19,6 @@ class File:
 		
 		self.sub = kwargs.get("sub", 0)
 		self.status = kwargs.get("status", FileStatus.NONE)
-		if not self._status_ok(self.status):
-			raise FileException("Invalid status")
 		
 		self.image = kwargs.get("image")
 		self.package = kwargs.get("package")
@@ -65,12 +63,9 @@ class File:
 			self.dt.day, self.dt.month, self.dt.year%100,
 			self.dt.hour, self.dt.minute, self.dt.second, self.dt.microsecond//1000,
 			self.frame%1000000,
-			self.status,
+			self.status.value,
 			end
 		)
-	
-	def _status_ok(self, status):
-		return status in statuses
 	
 	def path(self, root=".", ext=".png", subdirs=True):
 		if not ext.startswith("."):
@@ -96,7 +91,7 @@ class File:
 				microsecond=int(name[16:19])*1000
 			)
 			frame = int(name[20:26])
-			status = name[27]
+			status = FileStatus(name[27])
 			sub = int(name[29:]) if len(name) > 28 else 0
 			
 			return cls(sensor_id, dt, frame, sub=sub, status=status)
