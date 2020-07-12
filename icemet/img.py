@@ -1,7 +1,28 @@
+from icemet.file import File
+
 import cv2
 import numpy as np
 
 import os
+
+class Image(File):
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
+		self.mat = kwargs.get("mat", None)
+	
+	def open(self, path):
+		self.mat = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+	
+	def save(self, path):
+		root = os.path.split(path)[0]
+		os.makedirs(root, exist_ok=True)
+		cv2.imwrite(path, self.mat)
+	
+	def dynrange(self):
+		return np.ptp(self.mat)
+
+	def rotate(self, rot):
+		return np.rot90(self.mat, k=int(rot/-90))
 
 class BGSubStack:
 	def __init__(self, len, size):
@@ -12,10 +33,12 @@ class BGSubStack:
 	def clear(self):
 		self.full = False
 		self.i = 0
-		self.images = np.zeros((self.len, self.size[1], self.size[0]), dtype=np.uint8)
+		self.stack = np.zeros((self.len, self.size[1], self.size[0]), dtype=np.uint8)
+		self.images = self.len * [None]
 	
-	def push(self, image):
-		self.images[self.i] = image
+	def push(self, img):
+		self.stack[self.i] = img.mat
+		self.images[self.i] = img
 		self.i += 1
 		if self.i >= self.len:
 			self.i = 0
@@ -23,19 +46,10 @@ class BGSubStack:
 	
 	def meddiv(self):
 		j = (self.i + self.len//2) % self.len
-		image = self.images[j] / np.median(self.images, axis=0) * np.mean(self.images[j])
-		return image.astype(np.uint8)
-
-def open_image(path):
-	return cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-
-def save_image(path, image):
-	root = os.path.split(path)[0]
-	os.makedirs(root, exist_ok=True)
-	cv2.imwrite(path, image)
-
-def dynrange(image):
-	return np.ptp(image)
-
-def rotate(image, rot):
-	return np.rot90(image, k=int(rot/-90))
+		med = np.median(self.stack, axis=0) + 0.001
+		mat = self.stack[j] / med * np.mean(self.stack[j])
+		mat = np.clip(mat, a_min=0, a_max=255).astype(np.uint8)
+		
+		img = self.images[j]
+		img.mat = mat
+		return img
