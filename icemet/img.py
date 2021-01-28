@@ -20,7 +20,7 @@ class Image(File):
 	
 	def dynrange(self):
 		return np.ptp(self.mat)
-
+	
 	def rotate(self, rot):
 		return np.rot90(self.mat, k=int(rot/-90))
 

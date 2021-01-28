@@ -42,10 +42,7 @@ class ICEMETV1Package(Package):
 		self._vid = None
 	
 	def __del__(self):
-		try:
-			shutil.rmtree(self._dir)
-		except:
-			pass
+		shutil.rmtree(self._dir, ignore_errors=True)
 	
 	def _create_video(self, img):
 		size = (img.mat.shape[-1], img.mat.shape[-2])
@@ -59,8 +56,6 @@ class ICEMETV1Package(Package):
 		self._vid.write(img.mat)
 	
 	def save(self, path):
-		self._vid.release()
-		
 		data = {
 			"fps": self.fps,
 			"len": self.len,
@@ -71,8 +66,11 @@ class ICEMETV1Package(Package):
 			json.dump(data, fp)
 		
 		with zipfile.ZipFile(self._file, "w") as zf:
-			zf.write(self._vid_file, os.path.basename(self._vid_file))
 			zf.write(self._data_file, os.path.basename(self._data_file))
+			
+			if not self._vid is None:
+				zf.write(self._vid_file, os.path.basename(self._vid_file))
+				self._vid.release()
 		
 		shutil.move(self._file, path)
 
