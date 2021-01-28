@@ -88,32 +88,31 @@ class File:
 	def name(self, fmt="file_v1"):
 		return self.name_formats[fmt][0]()
 	
-	def set_name(self, name, fmt="file_v1"):
-		self.name_formats[fmt][1](name)
+	def set_name(self, name):
+		for _, func in self.name_formats.values():
+			try:
+				func(name)
+				return
+			except:
+				pass
+		raise FileException("Invalid file name format")
 	
-	def path(self, root=".", ext=".png", subdirs=True):
+	def path(self, root=".", ext=".png", subdirs=True, sep=os.path.sep):
 		if not ext.startswith("."):
 			ext = "." + ext
+		if not root.endswith(sep):
+			root += sep
 		if subdirs:
-			root = os.path.join(
-				root,
-				"{:04d}-{:02d}".format(self.datetime.year, self.datetime.month),
+			root += sep.join([
+				"{:02d}".format(self.datetime.year%100),
+				"{:02d}".format(self.datetime.month),
 				"{:02d}".format(self.datetime.day),
 				"{:02d}".format(self.datetime.hour)
-			)
-		return os.path.join(root, self.name() + ext)
+			]) + sep
+		return root + self.name() + ext
 	
 	@classmethod
 	def frompath(cls, path):
-		try:
-			obj = cls()
-			name = os.path.splitext(os.path.split(path)[-1])[0]
-			for fmt in obj.name_formats.keys():
-				try:
-					obj.set_name(name, fmt=fmt)
-					return obj
-				except:
-					pass
-			raise Exception()
-		except:
-			raise FileException("Invalid file path")
+		obj = cls()
+		obj.set_name(os.path.splitext(os.path.split(path)[-1])[0])
+		return obj
