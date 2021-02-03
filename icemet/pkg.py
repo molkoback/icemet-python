@@ -67,10 +67,9 @@ class ICEMETV1Package(Package):
 		
 		with zipfile.ZipFile(self._file, "w") as zf:
 			zf.write(self._data_file, os.path.basename(self._data_file))
-			
 			if not self._vid is None:
-				zf.write(self._vid_file, os.path.basename(self._vid_file))
 				self._vid.release()
+				zf.write(self._vid_file, os.path.basename(self._vid_file))
 		
 		shutil.move(self._file, path)
 
