@@ -25,31 +25,38 @@ class Image(File):
 		return np.rot90(self.mat, k=int(rot/-90))
 
 class BGSubStack:
-	def __init__(self, len, size):
+	def __init__(self, len):
 		self.len = len
-		self.size = size
-		self.clear()
-	
-	def clear(self):
 		self.full = False
 		self.i = 0
-		self.stack = np.zeros((self.len, self.size[1], self.size[0]), dtype=np.uint8)
+		self.means = np.empty((self.len,), dtype=np.float32)
 		self.images = self.len * [None]
+		self.stack = None
 	
 	def push(self, img):
-		self.stack[self.i] = img.mat
+		if self.stack is None:
+			self.stack = np.empty((self.len, *img.mat.shape), dtype=np.float32)
+		
+		self.means[self.i] = np.mean(img.mat)
 		self.images[self.i] = img
 		self.i += 1
 		if self.i >= self.len:
 			self.i = 0
 			self.full = True
+		return self.full
 	
 	def meddiv(self):
+		if not self.full:
+			return None
+		
 		j = (self.i + self.len//2) % self.len
+		for i in range(self.len):
+			self.stack[i] = self.images[i].mat / self.means[i] * self.means[j]
+		
 		med = np.median(self.stack, axis=0) + 0.001
-		mat = self.stack[j] / med * np.mean(self.stack[j])
+		mat = self.stack[j] / med * self.means[j]
 		mat = np.clip(mat, a_min=0, a_max=255).astype(np.uint8)
 		
-		img = self.images[j]
-		img.mat = mat
+		img = Image(mat=mat)
+		img.set_name(self.images[j].name())
 		return img
