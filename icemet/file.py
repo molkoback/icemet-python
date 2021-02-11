@@ -40,9 +40,8 @@ class File:
 	
 	def __lt__(self, other):
 		return (
-			(self.sensor_id<other.sensor_id) or
-			(self.sensor_id==other.sensor_id and self.datetime<other.datetime) or
-			(self.sensor_id==other.sensor_id and self.datetime==other.datetime and self.frame<other.frame)
+			(self.datetime<other.datetime) or
+			(self.datetime==other.datetime and self.frame<other.frame)
 		)
 	
 	def __le__(self, other):
