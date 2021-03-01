@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 class FileException(Exception):
@@ -14,7 +14,7 @@ class FileStatus(enum.Enum):
 class File:
 	def __init__(self, **kwargs):
 		self.sensor_id = kwargs.get("sensor_id", 0)
-		self.datetime = kwargs.get("datetime", datetime.now())
+		self.datetime = kwargs.get("datetime", datetime.utcnow())
 		self.frame = kwargs.get("frame", 0)
 		self.sub = kwargs.get("sub", 0)
 		self.status = kwargs.get("status", FileStatus.NONE)
@@ -76,7 +76,8 @@ class File:
 				hour=int(name[10:12]), 
 				minute=int(name[12:14]), 
 				second=int(name[14:16]),
-				microsecond=int(name[16:19])*1000
+				microsecond=int(name[16:19])*1000,
+				tzinfo=timezone.utc
 			)
 			self.frame = int(name[20:26])
 			self.status = FileStatus(name[27])

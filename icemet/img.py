@@ -26,22 +26,31 @@ class Image(File):
 
 class BGSubStack:
 	def __init__(self, len):
+		if len < 3 or len % 2 == 0:
+			raise ValueError("Invalid BGSubStack length")
 		self.len = len
 		self.full = False
-		self.i = 0
+		self.idx = 0
 		self.means = np.empty((self.len,), dtype=np.float32)
 		self.images = self.len * [None]
 		self.stack = None
+		self.eps = np.finfo(np.float32).eps
+	
+	def middle(self):
+		return (self.idx + self.len//2) % self.len
+	
+	def current(self):
+		return self.images[self.middle()]
 	
 	def push(self, img):
 		if self.stack is None:
 			self.stack = np.empty((self.len, *img.mat.shape), dtype=np.float32)
 		
-		self.means[self.i] = np.mean(img.mat)
-		self.images[self.i] = img
-		self.i += 1
-		if self.i >= self.len:
-			self.i = 0
+		self.means[self.idx] = np.mean(img.mat)
+		self.images[self.idx] = img
+		self.idx += 1
+		if self.idx >= self.len:
+			self.idx = 0
 			self.full = True
 		return self.full
 	
@@ -49,11 +58,12 @@ class BGSubStack:
 		if not self.full:
 			return None
 		
-		j = (self.i + self.len//2) % self.len
+		j = self.middle()
 		for i in range(self.len):
-			self.stack[i] = self.images[i].mat / self.means[i] * self.means[j]
+			mi = self.means[i] + self.eps
+			self.stack[i] = self.images[i].mat / mi * self.means[j]
 		
-		med = np.median(self.stack, axis=0) + 0.001
+		med = np.median(self.stack, axis=0) + self.eps
 		mat = self.stack[j] / med * self.means[j]
 		mat = np.clip(mat, a_min=0, a_max=255).astype(np.uint8)
 		
