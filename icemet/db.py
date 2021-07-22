@@ -67,6 +67,13 @@ class StatsRow:
 	
 	def __repr__(self):
 		return "<StatsRow {}>".format(self.__dict__)
+	
+	def icingrate(self, obj):
+		T = self.__dict__.get("Temp", None)
+		v = self.__dict__.get("Wind", None)
+		if T is None or v is None:
+			return None
+		return obj.icingrate(self.LWC, self.MVD, T, v)
 
 class Database:
 	def __init__(self, **kwargs):
