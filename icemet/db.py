@@ -35,14 +35,18 @@ __create_stats_table_fmt__ = "CREATE TABLE IF NOT EXISTS `{}`.`{}` ("\
 "Conc FLOAT NOT NULL,"\
 "Frames INT UNSIGNED NOT NULL,"\
 "Particles INT UNSIGNED NOT NULL,"\
+"Temp FLOAT,"\
+"Wind FLOAT,"\
 "PRIMARY KEY (ID),"\
 "INDEX (DateTime)"\
 ");"
-__select_tables_fmt__ = "SELECT TABLE_SCHEMA, TABLE_NAME FROM information_schema.TABLES"
-__select_particles_fmt__ = "SELECT ID, DateTime, Sensor, Frame, Particle, X, Y, Z, EquivDiam, EquivDiamCorr, Circularity, DynRange, EffPxSz, SubX, SubY, SubW, SubH FROM `{}`.`{}` ORDER BY ID ASC"
-__select_stats_fmt__ = "SELECT ID, DateTime, LWC, MVD, Conc, Frames, Particles FROM `{}`.`{}` ORDER BY DateTime ASC"
-__insert_particles_fmt__ = "INSERT INTO `{}`.`{}` (ID, DateTime, Sensor, Frame, Particle, X, Y, Z, EquivDiam, EquivDiamCorr, Circularity, DynRange, EffPxSz, SubX, SubY, SubW, SubH) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-__insert_stats_fmt__ = "INSERT INTO `{}`.`{}` (ID, DateTime, LWC, MVD, Conc, Frames, Particles) VALUES (NULL, %s, %s, %s, %s, %s, %s)"
+__select_tables_fmt__ = "SELECT TABLE_SCHEMA, TABLE_NAME FROM information_schema.TABLES;"
+__select_particles_fmt__ = "SELECT ID, DateTime, Sensor, Frame, Particle, X, Y, Z, EquivDiam, EquivDiamCorr, Circularity, DynRange, EffPxSz, SubX, SubY, SubW, SubH FROM `{}`.`{}` ORDER BY ID ASC;"
+__select_stats_fmt__ = "SELECT ID, DateTime, LWC, MVD, Conc, Frames, Particles, Temp, Wind FROM `{}`.`{}` ORDER BY DateTime ASC;"
+__insert_particles_fmt__ = "INSERT INTO `{}`.`{}` (ID, DateTime, Sensor, Frame, Particle, X, Y, Z, EquivDiam, EquivDiamCorr, Circularity, DynRange, EffPxSz, SubX, SubY, SubW, SubH) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+__insert_stats_fmt__ = "INSERT INTO `{}`.`{}` (ID, DateTime, LWC, MVD, Conc, Frames, Particles, Temp, Wind) VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s);"
+__update_particles_fmt__ = "UPDATE `{}`.`{}` SET DateTime=%s, Sensor=%s, Frame=%s, Particle=%s, X=%s, Y=%s, Z=%s, EquivDiam=%s, EquivDiamCorr=%s, Circularity=%s, DynRange=%s, EffPxSz=%s, SubX=%s, SubY=%s, SubW=%s, SubH=%s WHERE ID=%s;"
+__update_stats_fmt__ = "UPDATE `{}`.`{}` SET DateTime=%s, LWC=%s, MVD=%s, Conc=%s, Frames=%s, Particles=%s, Temp=%s, Wind=%s WHERE ID=%s;"
 
 class DBException(Exception):
 	pass
@@ -144,6 +148,20 @@ class Database:
 	def insert_stats(self, database, table, rows):
 		with self._conn.cursor() as curs:
 			for row in rows:
-				t = (row.DateTime.strftime("%Y-%m-%d %H:%M"), row.LWC, row.MVD, row.Conc, row.Frames, row.Particles)
+				t = (row.DateTime.strftime("%Y-%m-%d %H:%M"), row.LWC, row.MVD, row.Conc, row.Frames, row.Particles, row.Temp, row.Wind)
 				curs.execute(__insert_stats_fmt__.format(database, table), t)
+		self._conn.commit()
+	
+	def update_particles(self, database, table, rows):
+		with self._conn.cursor() as curs:
+			for row in rows:
+				t = (row.DateTime.strftime("%Y-%m-%d %H:%M:%S.%f"), row.Sensor, row.Frame, row.Particle, row.X, row.Y, row.Z, row.EquivDiam, row.EquivDiamCorr, row.Circularity, row.DynRange, row.EffPxSz, row.SubX, row.SubY, row.SubW, row.SubH, row.ID)
+				curs.execute(__update_particles_fmt__.format(database, table), t)
+		self._conn.commit()
+	
+	def update_stats(self, database, table, rows):
+		with self._conn.cursor() as curs:
+			for row in rows:
+				t = (row.DateTime.strftime("%Y-%m-%d %H:%M"), row.LWC, row.MVD, row.Conc, row.Frames, row.Particles, row.Temp, row.Wind, row.ID)
+				curs.execute(__update_stats_fmt__.format(database, table), t)
 		self._conn.commit()
