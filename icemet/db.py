@@ -58,6 +58,15 @@ class ParticlesRow:
 	def __repr__(self):
 		return "<ParticlesRow {}>".format(self.__dict__)
 	
+	def __setitem__(self, k, v):
+		self.__dict__[k] = v
+	
+	def __getitem__(self, k):
+		return self.__dict__[k]
+	
+	def get(self, k, default=None):
+		return self.__dict__.get(k, default)
+	
 	def file(self):
 		return File(sensor_id=self.Sensor, datetime=self.DateTime, frame=self.Frame, sub=self.Particle, status=FileStatus.NOTEMPTY)
 
@@ -68,9 +77,18 @@ class StatsRow:
 	def __repr__(self):
 		return "<StatsRow {}>".format(self.__dict__)
 	
+	def __setitem__(self, k, v):
+		self.__dict__[k] = v
+	
+	def __getitem__(self, k):
+		return self.__dict__[k]
+	
+	def get(self, k, default=None):
+		return self.__dict__.get(k, default)
+	
 	def icingrate(self, obj):
-		T = self.__dict__.get("Temp", None)
-		v = self.__dict__.get("Wind", None)
+		T = self.get("Temp")
+		v = self.get("Wind")
 		if T is None or v is None:
 			return None
 		return obj.icingrate(self.LWC, self.MVD, T, v)
