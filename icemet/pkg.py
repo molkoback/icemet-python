@@ -28,13 +28,15 @@ class Package(File):
 	def save(self, path: str) -> None:
 		raise NotImplementedError()
 
-class ICEMETV1Package(Package):
+class ICEMETPackage1(Package):
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
-		self._fourcc = "FFV1"
+		self.fourcc = kwargs.get("fourcc", "FFV1")
+		self.format = kwargs.get("format", "avi")
+		self.quality = kwargs.get("quality", 100)
 		
 		self._dir = os.path.join(cache, str(round(time.time()*1000)))
-		self._vid_file = os.path.join(self._dir, "images.avi")
+		self._vid_file = os.path.join(self._dir, "images." + self.format)
 		self._data_file = os.path.join(self._dir, "data.json")
 		self._file = os.path.join(self._dir, "package.zip")
 		os.makedirs(self._dir)
@@ -46,8 +48,8 @@ class ICEMETV1Package(Package):
 	
 	def _create_video(self, img):
 		size = (img.mat.shape[-1], img.mat.shape[-2])
-		self._vid = cv2.VideoWriter(self._vid_file, cv2.VideoWriter_fourcc(*self._fourcc), self.fps, size, False)
-		self._vid.set(cv2.VIDEOWRITER_PROP_QUALITY, 100)
+		self._vid = cv2.VideoWriter(self._vid_file, cv2.VideoWriter_fourcc(*self.fourcc), self.fps, size, False)
+		self._vid.set(cv2.VIDEOWRITER_PROP_QUALITY, self.quality)
 	
 	def add_img(self, img):
 		super().add_img(img)
@@ -74,22 +76,25 @@ class ICEMETV1Package(Package):
 		shutil.move(self._file, path)
 
 packages = {
-	"icemet_v1": (".iv1", ICEMETV1Package),
+	"icemet1": ((".ip1", ".iv1"), ICEMETPackage1),
 }
-packages["icemet"] = packages["icemet_v1"]
+packages["icemet"] = packages["icemet1"]
 
 def ext2name(ext):
-	list = [k for k, v in packages.items() if v[0] == ext]
-	if list:
-		return list[0]
-	return ""
+	for name, param in packages.items():
+		for _ext in param[0]:
+			if _ext == ext:
+				return name
+	return None
 
 def name2ext(name):
-	if not name in packages:
-		return ""
-	return packages[name][0]
+	param = packages.get(name, None)
+	if param is None:
+		return None
+	return param[0][0]
 
 def create_package(name, **kwargs):
-	if not name in packages:
+	param = packages.get(name, None)
+	if param is None:
 		raise PackageException("Invalid package format '{}'".format(name))
-	return packages[name][1](**kwargs)
+	return param[1](**kwargs)
