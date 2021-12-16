@@ -1,5 +1,4 @@
-from icemet import cache
-from icemet.file import File
+from icemet.file import File, FileStatus
 from icemet.img import Image
 
 import cv2
@@ -8,7 +7,7 @@ import json
 import os
 import shutil
 import tempfile
-import time
+import uuid
 import zipfile
 
 class PackageException(Exception):
@@ -31,17 +30,19 @@ class Package(File):
 class ICEMETPackage1(Package):
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
+		self.cache = kwargs.get("cache", os.path.join(tempfile.gettempdir(), "icemet"))
 		self.fourcc = kwargs.get("fourcc", "FFV1")
 		self.format = kwargs.get("format", "avi")
 		self.quality = kwargs.get("quality", 100)
 		
-		self._dir = os.path.join(cache, str(round(time.time()*1000)))
+		self._dir = os.path.join(self.cache, ".icemet-"+uuid.uuid4().hex)
 		self._vid_file = os.path.join(self._dir, "images." + self.format)
 		self._data_file = os.path.join(self._dir, "data.json")
 		self._file = os.path.join(self._dir, "package.zip")
-		os.makedirs(self._dir)
 		
 		self._vid = None
+		
+		os.makedirs(self._dir)
 	
 	def __del__(self):
 		shutil.rmtree(self._dir, ignore_errors=True)
@@ -53,9 +54,10 @@ class ICEMETPackage1(Package):
 	
 	def add_img(self, img):
 		super().add_img(img)
-		if self._vid is None:
-			self._create_video(img)
-		self._vid.write(img.mat)
+		if img.status == FileStatus.NOTEMPTY:
+			if self._vid is None:
+				self._create_video(img)
+			self._vid.write(img.mat)
 	
 	def save(self, path):
 		data = {
@@ -76,7 +78,7 @@ class ICEMETPackage1(Package):
 		shutil.move(self._file, path)
 
 packages = {
-	"icemet1": ((".ip1", ".iv1"), ICEMETPackage1),
+	"icemet1": ([".ip1", ".iv1"], ICEMETPackage1),
 }
 packages["icemet"] = packages["icemet1"]
 
