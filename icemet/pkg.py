@@ -27,6 +27,13 @@ class Package(File):
 	def save(self, path: str) -> None:
 		raise NotImplementedError()
 
+class DummyPackage(Package):
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
+	
+	def save(self, path: str) -> None:
+		pass
+
 class ICEMETPackage1(Package):
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
@@ -78,7 +85,8 @@ class ICEMETPackage1(Package):
 		shutil.move(self._file, path)
 
 packages = {
-	"icemet1": ([".ip1", ".iv1"], ICEMETPackage1),
+	"dummy": ([".dummy"], DummyPackage),
+	"icemet1": ([".ip1", ".iv1"], ICEMETPackage1)
 }
 packages["icemet"] = packages["icemet1"]
 
