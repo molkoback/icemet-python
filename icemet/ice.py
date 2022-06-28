@@ -31,10 +31,10 @@ class IcingObjectExeption(Exception):
 	pass
 
 class IcingObject:
-	def icingrate(self, LWC, MVD, T, v, **kwargs):
+	def icingrate(self, LWC, MVD, T, v, **kwargs) -> float:
 		raise NotImplementedError()
 
-class Cylinder:
+class Cylinder(IcingObject):
 	def __init__(self, D, l):
 		self.D = D
 		self.l = l
@@ -61,7 +61,10 @@ class Cylinder:
 			return 0
 		return max(val, 0)
 	
-	def icingrate(self, LWC, MVD, T, v, p=101325):
+	def icingrate(self, LWC, MVD, T, v, p=101325, T_max=2.0):
+		if T >= T_max:
+			return 0.0
+		
 		rho_air = density_air(p, T)
 		mu_air = viscosity_air(T)
 		rho_water = 1000.0
