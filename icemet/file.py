@@ -15,6 +15,7 @@ class File:
 	def __init__(self, **kwargs):
 		self.sensor_id = kwargs.get("sensor_id", 0)
 		self.datetime = kwargs.get("datetime", datetime.utcnow())
+		self.datetime = self.datetime.replace(tzinfo=None)
 		self.frame = kwargs.get("frame", 0)
 		self.sub = kwargs.get("sub", 0)
 		self.status = kwargs.get("status", FileStatus.NONE)
