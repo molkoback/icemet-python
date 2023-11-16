@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime, timezone
+from datetime import datetime
 import os
 
 class FileException(Exception):
@@ -74,11 +74,11 @@ class File:
 				year=int(name[7:9])+2000,
 				month=int(name[5:7]),
 				day=int(name[3:5]),
-				hour=int(name[10:12]), 
-				minute=int(name[12:14]), 
+				hour=int(name[10:12]),
+				minute=int(name[12:14]),
 				second=int(name[14:16]),
 				microsecond=int(name[16:19])*1000,
-				tzinfo=timezone.utc
+				tzinfo=None
 			)
 			self.frame = int(name[20:26])
 			self.status = FileStatus(name[27])

@@ -23,6 +23,13 @@ class Image(File):
 	
 	def rotate(self, rot):
 		return np.rot90(self.mat, k=int(rot/-90))
+	
+	@classmethod
+	def frompath(cls, path):
+		obj = cls()
+		obj.set_name(os.path.splitext(os.path.split(path)[-1])[0])
+		obj.open(path)
+		return obj
 
 class BGSubStack:
 	def __init__(self, len):
