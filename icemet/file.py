@@ -57,7 +57,7 @@ class File:
 	def _get_name_filev1(self):
 		end = "_{:d}".format(self.sub) if self.sub > 0 else ""
 		return "{:02X}_{:02d}{:02d}{:02d}_{:02d}{:02d}{:02d}{:03d}_{:06d}_{}{}".format(
-			self.sensor_id % 0xff,
+			self.sensor_id & 0xff,
 			self.datetime.day, self.datetime.month, self.datetime.year%100,
 			self.datetime.hour, self.datetime.minute, self.datetime.second, self.datetime.microsecond//1000,
 			self.frame%1000000,
