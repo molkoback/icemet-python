@@ -1,0 +1,31 @@
+[project]
+name = "icemet-python"
+version = "1.9.0.dev"
+description = "ICEMET Python libraries."
+authors = [
+	{name = "Eero Molkoselkä", email = "eero.molkoselka@gmail.com"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = [
+	"natsort",
+	"numpy (>=2.0)",
+	"opencv-python (>=4.0)",
+	"pymysql",
+	"pyyaml"
+]
+dynamic = ["classifiers"]
+
+[project.urls]
+repository = "https://github.com/molkoback/icemet-python"
+
+[tool.poetry]
+packages = [{include = "icemet"}]
+classifiers = [
+	"Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
