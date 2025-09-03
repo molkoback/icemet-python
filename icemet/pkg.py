@@ -24,7 +24,7 @@ class Package(File):
 	
 	def add_img(self, img: Image) -> None:
 		if not self.images:
-			self.size = img.mat.shape[1], img.mat.shape[0]
+			self.size = img.tensor().size()
 		self.images.append(img)
 	
 	def save(self, path: str) -> None:
@@ -50,7 +50,7 @@ class VideoWriter(ImageWriter):
 		self._vid.set(cv2.VIDEOWRITER_PROP_QUALITY, quality)
 	
 	def write(self, img):
-		self._vid.write(img.mat)
+		self._vid.write(img.numpy(uint8=True))
 	
 	def close(self):
 		self._vid.release()
@@ -60,7 +60,7 @@ class BinaryWriter(ImageWriter):
 		self._fp = open(file, "wb")
 	
 	def write(self, img):
-		self._fp.write(img.mat.data)
+		self._fp.write(img.numpy(uint8=True).data)
 	
 	def close(self):
 		self._fp.close()
