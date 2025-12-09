@@ -1,6 +1,6 @@
 [project]
 name = "icemet-python"
-version = "1.9.0.dev"
+version = "1.9.0"
 description = "ICEMET Python libraries."
 authors = [
 	{name = "Eero Molkoselkä", email = "eero.molkoselka@gmail.com"}
@@ -10,10 +10,11 @@ license = {text = "MIT"}
 requires-python = ">=3.9"
 dependencies = [
 	"natsort",
-	"numpy (>=2.0)",
-	"opencv-python (>=4.0)",
+	"numpy>=2.0",
+	"opencv-python>=4.0",
 	"pymysql",
-	"pytorch>=2.0",
+	"torch>=2.7",
+	"torchvision>=0.22",
 	"pyyaml"
 ]
 dynamic = ["classifiers"]

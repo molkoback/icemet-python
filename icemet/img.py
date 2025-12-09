@@ -29,8 +29,6 @@ class Image(File):
 		self.data = data.to(torch.get_default_device()).type(torch.float32)
 	
 	def tensor(self):
-		if self.data is None:
-			None
 		return self.data
 	
 	def numpy(self, uint8=False):
