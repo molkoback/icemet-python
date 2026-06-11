@@ -51,7 +51,7 @@ class Image(File):
 	
 	def dynrange(self):
 		if not "dynrange" in self.params:
-			self.params["dynrange"] = (self.tensor().max() - self.max.min()).item()
+			self.params["dynrange"] = (self.tensor().max() - self.tensor().min()).item()
 		return self.params["dynrange"]
 	
 	def mean(self):
@@ -127,8 +127,8 @@ class CombineStack(ImageStack):
 			return None
 		
 		img_curr = self.current()
-		t = torch.zeros(img_curr.tensor().size(), dtype=torch.float32)
-		t.to(torch.get_default_device())
+		t = torch.zeros(img_curr.tensor().size(), dtype=torch.float32, device=torch.get_default_device())
+		
 		sum = 0
 		for img in self.images:
 			mean = img.mean()
