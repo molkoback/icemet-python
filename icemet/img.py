@@ -23,7 +23,7 @@ class Image(File):
 	
 	def set_data(self, data):
 		if isinstance(data, np.ndarray):
-			data = torch.from_numpy(data)
+			data = torch.from_numpy(data.copy())
 		elif not isinstance(data, torch.Tensor):
 			raise ValueError("Invalid image data type")
 		self.data = data.to(torch.get_default_device()).type(torch.float32)
